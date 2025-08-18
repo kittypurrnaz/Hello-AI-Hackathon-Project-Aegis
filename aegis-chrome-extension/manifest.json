@@ -4,10 +4,21 @@
   "description": "Monitors browsing activity to protect children from harmful content.",
   "manifest_version": 3,
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "permissions": [
     "history",
-    "storage"
-  ]
+    "storage",
+    "offscreen"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';",
+    "sandbox": "sandbox allow-scripts; script-src 'self' 'unsafe-eval'; connect-src https://tfhub.dev https://storage.googleapis.com https://www.kaggle.com;"
+  },
+  "sandbox": {
+    "pages": [
+      "sandbox.html"
+    ]
+  }
 }
