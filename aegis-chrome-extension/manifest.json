@@ -1,0 +1,13 @@
+{
+  "name": "Aegis Project",
+  "version": "1.0",
+  "description": "Monitors browsing activity to protect children from harmful content.",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "history",
+    "storage"
+  ]
+}
