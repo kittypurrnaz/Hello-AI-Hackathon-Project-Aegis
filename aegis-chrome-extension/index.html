@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Child Monitor Extension</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#ffffff',
+                        foreground: 'oklch(0.145 0 0)',
+                        card: '#ffffff',
+                        'card-foreground': 'oklch(0.145 0 0)',
+                        primary: '#030213',
+                        'primary-foreground': 'oklch(1 0 0)',
+                        secondary: 'oklch(0.95 0.0058 264.53)',
+                        'secondary-foreground': '#030213',
+                        muted: '#ececf0',
+                        'muted-foreground': '#717182',
+                        accent: '#e9ebef',
+                        'accent-foreground': '#030213',
+                        border: 'rgba(0, 0, 0, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background-color: #cbced4;
+            border-radius: 12px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        
+        .toggle-switch.active {
+            background-color: #030213;
+        }
+        
+        .toggle-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .toggle-switch.active .toggle-thumb {
+            transform: translateX(20px);
+        }
+
+        .card {
+            background-color: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 0.625rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: colors;
+        }
+
+        .badge-default {
+            background-color: #030213;
+            color: oklch(1 0 0);
+        }
+
+        .badge-secondary {
+            background-color: oklch(0.95 0.0058 264.53);
+            color: #030213;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-outline {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: transparent;
+            color: oklch(0.145 0 0);
+        }
+
+        .btn-outline:hover {
+            background-color: #e9ebef;
+        }
+
+        .icon {
+            width: 1rem;
+            height: 1rem;
+            fill: currentColor;
+        }
+
+        .icon-lg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .icon-sm {
+            width: 0.75rem;
+            height: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground">
+    <div class="w-80 p-4 space-y-4">
+        <!-- Logo Area - Reserved for your logo -->
+        <div class="flex items-center justify-center py-3">
+            <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                <span class="text-xs text-gray-500 text-center">Logo Area</span>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <div class="flex items-center justify-center space-x-2">
+                <svg id="eye-icon" class="icon icon-lg text-primary hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg id="eye-off-icon" class="icon icon-lg text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/>
+                    <path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.74 9.74 0 0 0 5.39-1.61"/>
+                    <line x1="2" y1="2" x2="22" y2="22"/>
+                </svg>
+                <h1 class="text-lg font-semibold">Child Monitor</h1>
+            </div>
+            <p class="text-sm text-muted-foreground">Browsing protection tool</p>
+        </div>
+
+        <!-- Main Toggle Card -->
+        <div class="card">
+            <div class="p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="space-y-1">
+                        <label for="monitor-toggle" class="text-base font-medium cursor-pointer">
+                            Protection Status
+                        </label>
+                        <p class="text-sm text-muted-foreground" id="status-text">
+                            Protection disabled
+                        </p>
+                    </div>
+                    <div class="toggle-switch" id="monitor-toggle" onclick="toggleMonitoring()">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="flex items-center justify-center">
+                    <div class="badge badge-secondary flex items-center space-x-1 px-3 py-1" id="status-badge">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18.36 6.64A9 9 0 0 1 20.77 15"/>
+                            <path d="M6.16 6.16a9 9 0 1 0 12.68 12.68"/>
+                            <path d="M12 2v4"/>
+                            <path d="m2 2 20 20"/>
+                        </svg>
+                        <span>Unprotected</span>
+                    </div>
+                </div>
+
+                <!-- Status Information -->
+                <div class="text-center space-y-1">
+                    <p class="text-sm" id="activity-text">No recent activity</p>
+                    <p class="text-xs text-muted-foreground hidden" id="extension-status">
+                        Extension is active on all tabs
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="space-y-2">
+            <button class="btn btn-outline w-full flex items-center justify-center space-x-2" onclick="openDashboard()">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span>Open Dashboard</span>
+            </button>
+            
+            <div class="text-xs text-center text-muted-foreground px-2">
+                Click the toggle above to start or stop monitoring your child's browsing activity
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let monitoringEnabled = false;
+
+        function toggleMonitoring() {
+            monitoringEnabled = !monitoringEnabled;
+            
+            const toggle = document.getElementById('monitor-toggle');
+            const statusText = document.getElementById('status-text');
+            const statusBadge = document.getElementById('status-badge');
+            const activityText = document.getElementById('activity-text');
+            const extensionStatus = document.getElementById('extension-status');
+            const eyeIcon = document.getElementById('eye-icon');
+            const eyeOffIcon = document.getElementById('eye-off-icon');
+            
+            if (monitoringEnabled) {
+                toggle.classList.add('active');
+                statusText.textContent = 'Actively monitoring browsing';
+                statusBadge.innerHTML = `
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+                    </svg>
+                    <span>Protected</span>
+                `;
+                statusBadge.className = 'badge badge-default flex items-center space-x-1 px-3 py-1';
+                activityText.textContent = 'Monitoring started just now';
+                extensionStatus.classList.remove('hidden');
+                eyeIcon.classList.remove('hidden');
+                eyeIcon.classList.add('text-primary');
+                eyeOffIcon.classList.add('hidden');
+            } else {
+                toggle.classList.remove('active');
+                statusText.textContent = 'Protection disabled';
+                statusBadge.innerHTML = `
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18.36 6.64A9 9 0 0 1 20.77 15"/>
+                        <path d="M6.16 6.16a9 9 0 1 0 12.68 12.68"/>
+                        <path d="M12 2v4"/>
+                        <path d="m2 2 20 20"/>
+                    </svg>
+                    <span>Unprotected</span>
+                `;
+                statusBadge.className = 'badge badge-secondary flex items-center space-x-1 px-3 py-1';
+                activityText.textContent = 'Monitoring paused';
+                extensionStatus.classList.add('hidden');
+                eyeIcon.classList.add('hidden');
+                eyeOffIcon.classList.remove('hidden');
+                eyeOffIcon.classList.add('text-muted-foreground');
+            }
+        }
+
+        function openDashboard() {
+            console.log('Opening full dashboard...');
+            // In a real Chrome extension, this would open a new tab with:
+            // chrome.tabs.create({ url: 'dashboard.html' });
+            alert('Dashboard would open in a new tab (Chrome extension functionality)');
+        }
+    </script>
+</body>
+</html>
