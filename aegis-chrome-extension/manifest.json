@@ -10,7 +10,8 @@
   "permissions": [
     "history",
     "storage",
-    "offscreen"
+    "offscreen",
+    "webNavigation"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';",
