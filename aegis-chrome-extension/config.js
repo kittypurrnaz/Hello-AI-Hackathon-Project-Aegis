@@ -20,5 +20,12 @@ export const config = {
   TOXICITY_THRESHOLD: 0.7,
   
   // Number of recent history items to analyze
-  HISTORY_ANALYSIS_COUNT: 50
+  HISTORY_ANALYSIS_COUNT: 50,
+
+   // The endpoint for your database
+  INTERMEDIATE_STORAGE_ENDPOINT: 'https://your-database-api.com/api/store-report',
+  
+  // Keywords to determine severity
+  IMMEDIATE_CATEGORIES: ['identity_attack', 'severe_toxicity', 'suicide', 'gore', 'drugs'], // Added common toxicity labels
+  INTERMEDIATE_CATEGORIES: ['nsfw', 'smut', 'toxicity', 'insult', 'racial insults', 'sexual'] // Added common toxicity labels
 };
