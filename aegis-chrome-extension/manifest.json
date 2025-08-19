@@ -11,7 +11,13 @@
     "history",
     "storage",
     "offscreen",
-    "webNavigation"
+    "webNavigation",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://your-frontend-api.com/*", 
+    "https://generativelanguage.googleapis.com/"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';",
@@ -22,5 +28,6 @@
       "sandbox.html"
     ]
   },
+  "minimum_chrome_version": "109",
   "action": {}
 }
