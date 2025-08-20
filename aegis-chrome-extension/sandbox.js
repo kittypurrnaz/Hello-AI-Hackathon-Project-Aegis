@@ -30,7 +30,12 @@ self.addEventListener('message', async (event) => {
 
   switch (type) {
       case 'url_analysis_request':
-          currentReport.urlAnalysis = await analyzeUrlInSandbox(url);
+          //currentReport.urlAnalysis = await analyzeUrlInSandbox(url);
+          currentReport.urlAnalysis = payload;
+          // CORRECTED: Store the received authToken with the report
+          if (authToken) {
+            currentReport.authToken = authToken;
+          }
           break;
       case 'screenshot_result':
           currentReport.screenshotAnalysis = payload;

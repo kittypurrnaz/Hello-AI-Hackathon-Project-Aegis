@@ -53,6 +53,51 @@ export async function analyzeScreenshotWithGemini(base64Image, authToken) {
   }
 }
 
+// api.js
+
+export async function analyzeUrlWithGemini(urlToAnalyze, authToken) {
+  const url = `https://${config.GEMINI_API_LOCATION}-aiplatform.googleapis.com/v1/projects/${config.GEMINI_PROJECT_ID}/locations/${config.GEMINI_API_LOCATION}/publishers/google/models/${config.GEMINI_API_MODEL}:generateContent`;
+
+  const prompt = `
+    Analyze the following URL's text for any toxicity: "${urlToAnalyze}". 
+    Analyze this webpage screenshot for any of the following: violence, adult content, hate speech, or self-harm imagery."
+    Respond in JSON format with a boolean \`isHarmful\` and a string \`reason\` explaining why.
+    Respond with a simple JSON object indicating if it's harmful, like {"isHarmful": true, "reason": "Contains toxic language"}. 
+    If not harmful, respond with {"isHarmful": false, "reason": "No toxic content found"}.
+  `;
+
+  const payload = {
+    contents: [{
+      "role": "user",
+      parts: [{ "text": prompt }]
+    }]
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.json();
+      throw new Error(`Vertex AI API error! Status: ${response.status} - ${JSON.stringify(errorBody)}`);
+    }
+
+    const data = await response.json();
+    const jsonString = data.candidates[0].content.parts[0].text;
+    return JSON.parse(jsonString.replace(/```json|```/g, ''));
+
+  } catch (error) {
+    console.error('Error analyzing URL with Gemini:', error);
+    return { error: error.message };
+  }
+}
+
 /**
  * Sends the final analysis report to your frontend API.
  * @param {object} reportData - The complete, categorized report.

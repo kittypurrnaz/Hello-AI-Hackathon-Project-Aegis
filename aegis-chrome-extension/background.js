@@ -1,7 +1,7 @@
 // background.js
 
 import { config } from './config.js';
-import { analyzeScreenshotWithGemini } from './api.js';
+import { analyzeScreenshotWithGemini, analyzeUrlWithGemini } from './api.js';
 
 const OFFSCREEN_DOCUMENT_PATH = 'offscreen.html';
 
@@ -88,9 +88,10 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
       console.log("Auth token acquired. Proceeding with analysis.");
 
       // Send the URL for analysis
+      const urlAnalysis = await analyzeUrlWithGemini(details.url, authToken);
       chrome.runtime.sendMessage({
         target: 'offscreen',
-        data: { type: 'url_analysis_request', url: details.url }
+        data: { type: 'url_analysis_request', url: details.url, payload: urlAnalysis, authToken: authToken }
       });
 
       // Perform screenshot analysis
