@@ -10,11 +10,11 @@ export const config = {
   FRONTEND_API_ENDPOINT: 'https://your-frontend-api.com/api/report',
   
   // Replace with your actual Gemini API key
-  GEMINI_API_KEY: 'YOUR_GEMINI_API_KEY',
+  GEMINI_API_KEY: 'YOUR_API_KEY_HERE',
+  GEMINI_API_LOCATION: 'us-central1',
+  GEMINI_API_MODEL: 'gemini-2.5-flash', // The specific Gemini model you are using
+  GEMINI_PROJECT_ID: 'trainee-project-tianyi', // Replace with your actual project ID
   
-  // The specific Gemini model endpoint you are using
-  GEMINI_API_ENDPOINT: `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent`,
-
   // --- ANALYSIS THRESHOLDS ---
   // Value from 0 to 1. If any toxicity label score is above this, it's flagged.
   TOXICITY_THRESHOLD: 0.7,

@@ -6,31 +6,44 @@ import { config } from './config.js';
  * @param {string} base64Image - The base64 encoded image string.
  * @returns {Promise<object>} - The analysis result from the API.
  */
-export async function analyzeScreenshotWithGemini(base64Image) {
-  const url = `${config.GEMINI_API_ENDPOINT}?key=${config.GEMINI_API_KEY}`;
+export async function analyzeScreenshotWithGemini(base64Image, authToken) {
+  // CORRECTED: The endpoint should use ':generateContent'
+  const url = `https://${config.GEMINI_API_LOCATION}-aiplatform.googleapis.com/v1/projects/${config.GEMINI_PROJECT_ID}/locations/${config.GEMINI_API_LOCATION}/publishers/google/models/${config.GEMINI_API_MODEL}:generateContent`
 
+  // CORRECTED: The payload for Vertex AI requires the "role" field
   const payload = {
     contents: [{
+      "role": "user",
       parts: [
         { text: "Analyze this webpage screenshot for any of the following: violence, adult content, hate speech, or self-harm imagery. Respond in JSON format with a boolean `isHarmful` and a string `reason` explaining why." },
         { inline_data: { mime_type: "image/jpeg", data: base64Image } }
       ]
     }]
   };
-
+  console.log(url, payload);
   try {
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        // CORRECTED: You MUST include an Authorization header
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json' 
+      },
       body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      throw new Error(`Gemini API error! Status: ${response.status}`);
+      // It's helpful to log the response body for more detailed errors
+      const errorBody = await response.json();
+      throw new Error(`Gemini API error! Status: ${response.status} - ${JSON.stringify(errorBody)}`);
     }
 
     const data = await response.json();
-    // Safely parse the JSON string from Gemini's text response
+    // The response structure for generateContent might be slightly different.
+    // It's safer to check for the candidates array before accessing it.
+    if (!data.candidates || data.candidates.length === 0) {
+      throw new Error("Invalid response from Gemini API: No candidates found.");
+    }
     const jsonString = data.candidates[0].content.parts[0].text;
     return JSON.parse(jsonString.replace(/```json|```/g, '').trim());
 

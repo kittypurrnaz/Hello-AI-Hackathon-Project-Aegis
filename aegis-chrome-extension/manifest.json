@@ -12,13 +12,21 @@
     "storage",
     "offscreen",
     "webNavigation",
-    "activeTab"
+    "activeTab",
+    "identity"
   ],
   "host_permissions": [
     "<all_urls>",
     "https://your-frontend-api.com/*", 
-    "https://generativelanguage.googleapis.com/"
+    "https://generativelanguage.googleapis.com/",
+    "https://*.googleapis.com/"
   ],
+  "oauth2": {
+    "client_id": "943089436637-l2ivb1qs0pe82j8af5j7716412bkclh6.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';",
     "sandbox": "sandbox allow-scripts; script-src 'self' 'unsafe-eval'; connect-src https://tfhub.dev https://storage.googleapis.com https://www.kaggle.com;"
@@ -29,5 +37,11 @@
     ]
   },
   "minimum_chrome_version": "109",
-  "action": {}
+  "action": {},
+  "web_accessible_resources": [
+    {
+      "resources": ["icon.png"],
+      "matches": ["https://your-dashboard-domain.com/*"]
+    }
+  ]
 }

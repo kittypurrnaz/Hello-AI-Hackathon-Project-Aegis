@@ -1,5 +1,4 @@
 // sandbox.js
-
 // NOTE: You may need to make 'config.js' available to the sandbox if it's not already.
 // For example, by moving it to a web accessible location. For now, we'll assume it is.
 const config = {
@@ -68,97 +67,44 @@ async function analyzeUrlInSandbox(url) {
 // MOVED: This function was moved here from background.js
 function mergeAndCategorize(report) {
   let severity = 'low';
-  const flaggedCategories = new Set(); // Use a Set to avoid duplicate categories
+  const issues = [];
 
-  // Helper function to check for keywords in analysis results
-  const checkForFlags = (text, categories) => {
-    for (const category of categories) {
-      if (text.toLowerCase().includes(category.toLowerCase())) {
-        flaggedCategories.add(category);
-      }
-    }
-  };
-
-  // 1. Check URL/Text analysis from TensorFlow.js
   if (report.urlAnalysis && !report.urlAnalysis.error) {
-    report.urlAnalysis.forEach(prediction => {
-      if (prediction.results[0].match === true) {
-        checkForFlags(prediction.label, [...config.IMMEDIATE_CATEGORIES, ...config.INTERMEDIATE_CATEGORIES]);
-      }
-    });
+      report.urlAnalysis.forEach(pred => {
+          if (pred.results[0].match === true) {
+              issues.push(`URL text flagged for: ${pred.label}`);
+          }
+      });
   }
 
-  // 2. Check Screenshot analysis from Gemini
-  if (report.screenshotAnalysis && report.screenshotAnalysis.reason) {
-     checkForFlags(report.screenshotAnalysis.reason, [...config.IMMEDIATE_CATEGORIES, ...config.INTERMEDIATE_CATEGORIES]);
+  if (report.screenshotAnalysis && report.screenshotAnalysis.isHarmful) {
+      issues.push(`Screenshot flagged for: ${report.screenshotAnalysis.reason}`);
   }
-  
-  // 3. Determine final severity
-  for (const category of flaggedCategories) {
-    if (config.IMMEDIATE_CATEGORIES.includes(category)) {
+
+  if (issues.length > 2) {
       severity = 'immediate';
-      break; // Immediate severity overrides all others
-    }
-    if (config.INTERMEDIATE_CATEGORIES.includes(category)) {
+  } else if (issues.length > 0) {
       severity = 'intermediate';
-    }
   }
   
   report.severity = severity;
-  report.flaggedCategories = Array.from(flaggedCategories);
+  report.issues = issues;
   return report;
 }
 
 // MOVED: This function was moved here from background.js
 async function sendResultsToFrontend(reportData) {
-  console.log(`[Sandbox] Report categorized as '${reportData.severity}'. Routing accordingly.`);
-
-  switch (reportData.severity) {
-    case 'immediate':
-      // For high severity, send directly to the frontend.
-      console.log('[Sandbox] Sending immediate alert to frontend...');
-      try {
-        await fetch(config.IMMEDIATE_REPORT_ENDPOINT, {
+  // This will ONLY work if you modify manifest.json to allow network requests from the sandbox.
+  console.log('[Sandbox] Sending final report to frontend:', reportData);
+  try {
+      const response = await fetch(config.FRONTEND_API_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(reportData)
-        });
-        console.log('[Sandbox] Immediate alert sent successfully.');
-      } catch (error) {
-        console.error('[Sandbox] Failed to send immediate alert:', error);
-      }
-      break;
-
-    case 'intermediate':
-      // For medium severity, send to the database first, then the frontend.
-      console.log('[Sandbox] Sending intermediate report to database...');
-      try {
-        const dbResponse = await fetch(config.INTERMEDIATE_STORAGE_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(reportData)
-        });
-
-        if (!dbResponse.ok) throw new Error('Database API failed.');
-        
-        console.log('[Sandbox] Report stored in database. Now sending to frontend...');
-        
-        // After successfully saving to DB, forward to frontend.
-        await fetch(config.IMMEDIATE_REPORT_ENDPOINT, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reportData)
-        });
-
-        console.log('[Sandbox] Intermediate report sent to frontend successfully.');
-      } catch (error) {
-        console.error('[Sandbox] Failed to process intermediate report:', error);
-      }
-      break;
-
-    case 'low':
-      // For low severity, do nothing.
-      console.log('[Sandbox] Low severity report. No action taken.');
-      break;
+      });
+      if (!response.ok) throw new Error(`API Error: ${response.status}`);
+      console.log('[Sandbox] Report sent successfully.');
+  } catch (error) {
+      console.error('[Sandbox] Failed to send report:', error);
   }
 }
