@@ -87,20 +87,21 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
       }
       console.log("Auth token acquired. Proceeding with analysis.");
 
-      // 2. Send the URL to the offscreen document for its analysis.
+      // Send the URL for analysis
       chrome.runtime.sendMessage({
         target: 'offscreen',
         data: { type: 'url_analysis_request', url: details.url }
       });
 
-      // 3. Perform screenshot analysis, passing the authToken.
+      // Perform screenshot analysis
       const screenshotAnalysis = await analyzeScreenshot(details.tabId, authToken);
+      // CORRECTED: Add the authToken to the message payload
       chrome.runtime.sendMessage({
           target: 'offscreen',
-          data: { type: 'screenshot_result', url: details.url, payload: screenshotAnalysis }
+          data: { type: 'screenshot_result', url: details.url, payload: screenshotAnalysis, authToken: authToken }
       });
 
-      // 4. Perform history analysis and forward the result.
+      // Perform history analysis
       const historyAnalysis = await analyzeHistory();
        chrome.runtime.sendMessage({
           target: 'offscreen',
