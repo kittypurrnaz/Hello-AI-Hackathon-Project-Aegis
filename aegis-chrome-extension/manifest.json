@@ -17,7 +17,7 @@
   ],
   "host_permissions": [
     "<all_urls>",
-    "https://your-frontend-api.com/*", 
+    "https://aegis-ingestion-api-943089436637.us-central1.run.app/", 
     "https://generativelanguage.googleapis.com/",
     "https://*.googleapis.com/"
   ],
@@ -29,7 +29,7 @@
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';",
-    "sandbox": "sandbox allow-scripts; script-src 'self' 'unsafe-eval'; connect-src https://tfhub.dev https://storage.googleapis.com https://www.kaggle.com https://*.googleapis.com/;"
+    "sandbox": "sandbox allow-scripts; script-src 'self' 'unsafe-eval'; connect-src https://tfhub.dev https://storage.googleapis.com https://www.kaggle.com https://*.googleapis.com/ https://aegis-ingestion-api-943089436637.us-central1.run.app;"
   },
   "sandbox": {
     "pages": [
@@ -43,5 +43,8 @@
       "resources": ["icon.png"],
       "matches": ["https://your-dashboard-domain.com/*"]
     }
-  ]
+  ],
+  "icons": {
+    "16": "image.png"
+  }
 }

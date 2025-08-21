@@ -105,7 +105,7 @@ export async function analyzeUrlWithGemini(urlToAnalyze, authToken) {
  */
 export async function sendResultsToFrontend(reportData) {
   try {
-    const response = await fetch(config.FRONTEND_API_ENDPOINT, {
+    const response = await fetch(config.BQ_API_ENDPOINT + 'upload_data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reportData)

@@ -3,7 +3,7 @@
 
 // For example, by moving it to a web accessible location. For now, we'll assume it is.
 const config = {
-  FRONTEND_API_ENDPOINT: 'https://your-frontend-api.com/api/report', // Example endpoint
+  BQ_API_ENDPOINT: 'https://aegis-ingestion-api-943089436637.us-central1.run.app/', // Example endpoint
 };
 
 // --- State Management ---
@@ -119,10 +119,10 @@ async function sendResultsToFrontend(reportData) {
   // This will ONLY work if you modify manifest.json to allow network requests from the sandbox.
   console.log('[Sandbox] Sending final report to frontend:', reportData);
   try {
-      const response = await fetch(config.FRONTEND_API_ENDPOINT, {
+      const response = await fetch(config.BQ_API_ENDPOINT + 'upload_data', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(reportData)
+          body: JSON.stringify([reportData])
       });
       if (!response.ok) throw new Error(`API Error: ${response.status}`);
       console.log('[Sandbox] Report sent successfully.');
@@ -155,7 +155,7 @@ async function generateJsonReport(analysisData, authToken) {
     3.  If the threat is less severe (e.g., nsfw, hurtful language), classify it as an "INTERMEDIATE_FLAG".
     4.  Select the most fitting 'flag_type' and 'topic_category'.
     5.  Estimate a 'confidence' score from 0.0 to 1.0.
-    6.  The 'user_id' should be "hashed_user_id_12345".
+    6.  The 'user_id' should be "hashed_user_id_0000x", the x alternating between 1 or 2 randomized.
     7.  Your entire response must be ONLY the JSON object, with no extra text or markdown formatting.
 
     Use one of the following two formats for your response:
@@ -171,7 +171,7 @@ async function generateJsonReport(analysisData, authToken) {
       "source_platform": "Chrome Extension",
       "event_details": {
         "context": "multiple searches and browsing activity",
-        "corroborating_signals": ["low messaging volume"]
+        "corroborating_signals": ["high messaging volume"]
       }
     }
 
@@ -185,9 +185,13 @@ async function generateJsonReport(analysisData, authToken) {
       "topic_category": "Social Dynamics",
       "source_platform": "Chrome Extension",
       "event_details": {
-        "context": "sustained pattern of negative sentiment"
+        "context": "sustained pattern of negative sentiment",
+        "corroborating_signals": ["low messaging volume"]
       }
     }
+
+    Make sure that the format is exactly as shown, with no additional text or formatting, and acceptable
+    in Pydantic Model format.
   `;
 
   // 2. Create the payload for the API

@@ -7,7 +7,7 @@ export const config = {
   STORE_LOCALLY: true,
 
   // --- API ENDPOINTS & KEYS ---
-  FRONTEND_API_ENDPOINT: 'https://your-frontend-api.com/api/report',
+  BQ_API_ENDPOINT: 'https://aegis-ingestion-api-943089436637.us-central1.run.app/',
   
   // Replace with your actual Gemini API key
   GEMINI_API_KEY: 'YOUR_API_KEY_HERE',
