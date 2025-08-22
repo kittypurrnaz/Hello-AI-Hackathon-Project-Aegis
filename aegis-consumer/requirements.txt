@@ -1,4 +1,1 @@
-fastapi
-pydantic
-google-cloud-bigquery
-uvicorn
+apache-beam[gcp]
