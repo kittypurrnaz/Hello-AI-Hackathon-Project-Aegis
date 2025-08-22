@@ -1,8 +1,3 @@
-
-
-
-
-
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -17,6 +12,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import ReactMarkdown from 'react-markdown';
 
 import { Clock, Shield, Globe, Settings, User, AlertTriangle, Check, X, TrendingUp, Download, Calendar, BarChart3, PieChart, Activity, Flag, Brain, Zap, ExternalLink, ChevronRight, ChevronDown, FileText, RefreshCw, Search, Filter, Bot, MessageCircle, Send, Cpu, Timer, Eye, BookOpen, Loader2, Plus, Trash2, Edit } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell, LineChart, Line, Area, AreaChart, Pie } from 'recharts';
@@ -104,8 +100,9 @@ export function MonitoringDashboard() {
     const [generatedReport, setGeneratedReport] = useState<any>(null);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [streamedReportContent, setStreamedReportContent] = useState<string | null>(null);
-    const [isCustomDateRange, setIsCustomDateRange] = useState(false);
 
+
+    
 
     // Loading and error states for data fetching
     const [isLoading, setIsLoading] = useState(true);
@@ -121,7 +118,7 @@ export function MonitoringDashboard() {
 
     // --- AGENT STATE (UPDATED) ---
     const [isAgentLoading, setIsAgentLoading] = useState(false);
-    const [days, setDays] = useState(7);
+    
     const [startDate, setStartDate] = useState('2025-08-01');
     const [endDate, setEndDate] = useState('2025-08-31');
     const [chatTone, setChatTone] = useState('Parental');
@@ -135,7 +132,159 @@ export function MonitoringDashboard() {
 
     // Base URL for your API
     const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api';
-    const ADK_SERVER_URL = import.meta.env.VITE_ADK_URL;
+    // const ADK_SERVER_URL = import.meta.env.VITE_ADK_URL;
+    // --- PARENTAL ADVICE MAP ---
+// IMPORTANT: Replace the keys ('Alice', 'Jake', 'Ronald') with the actual user IDs from your database.
+// --- PARENTAL ADVICE MAP (with Markdown formatting) ---
+// IMPORTANT: Replace the keys ('Alice', 'Jake', 'Ronald') with the actual user IDs from your database.
+const PARENTAL_ADVICE_MAP = {
+  'Alice': `
+It can be incredibly unsettling to learn that your child might be struggling with thoughts of self-harm. Please know that you're not alone in this, and we are here to support you.
+
+Our system has detected a message from Alice that suggests she may be having thoughts of self-harm. Given the high confidence of this signal, we believe it's important to address this with care and urgency.
+
+#### Suggestions for Conversation
+1.  **Find a calm and private moment to talk.** This isn't a conversation to have on the go. Find a time when you and Alice can speak openly without interruptions.
+2.  **Start with a gentle, open-ended question.** You could say something like, *"I get the sense that you might be feeling overwhelmed lately. Can we talk about it?"*
+3.  **Listen more than you speak.** The goal is to create a safe space for Alice to share what she's feeling without fear of judgment.
+4.  **Express your love and support.** Reassure her by saying, *"I love you, and I'm here for you. We'll get through this together."*
+
+#### Immediate Resources
+Given the nature of this alert, we strongly recommend reaching out to a mental health professional.
+* **National Suicide Prevention Lifeline:** 988
+* **Crisis Text Line:** Text HOME to 741741
+
+Please remember, taking the first step to open up a conversation with Alice is a brave and loving act.
+`,
+
+  'Jake': `
+It’s understandable to be concerned about Jake's well-being. We’ve detected a concerning signal related to self-harm in his recent online activity that requires immediate attention.
+
+#### Immediate Safety
+Your first step is to ensure Jake is safe. If you believe he is in immediate danger, **please call 911 or your local emergency services.** For 24/7 support, you can also reach out to:
+* **Suicide & Crisis Lifeline:** Dial 988 (US/Canada)
+* **Crisis Support:** Dial 111 (UK)
+
+It's crucial to connect with a mental health professional who can provide both you and Jake with the right support.
+
+#### Starting a Conversation
+Here are a few ideas on how you might approach this with a calm and loving tone:
+* *"I’ve noticed you’ve seemed a bit down lately, and I wanted to check in and see how you’re doing. You don't have to go through anything alone."*
+* *"I love you, and I’m worried about you. I’m here to listen without judgment whenever you’re ready to talk."*
+
+When you do talk, focus on listening and understanding. Let him know that you’re on his side.
+`,
+
+  'Ronald': `
+It’s completely understandable to be worried about Ronald, and we commend you for being proactive. We've detected very strong signals that Ronald may be in **immediate danger of self-harm**, and it’s crucial that we act quickly.
+
+#### 1. Get Immediate Professional Help
+This is the most critical step. **Please do not wait.**
+* **Crisis Hotline:** Call or text 988 (US/Canada) or call 111 (UK).
+* **Emergency Services:** If you believe he is in immediate danger, do not hesitate to call 911.
+* **Mental Health Professional:** If Ronald has a therapist, contact them immediately.
+
+#### 2. Start a Gentle Conversation
+It’s essential to talk to Ronald with love and without judgment. You could start by saying:
+*"I’ve noticed you’ve been spending more time alone... I love you, and I’m worried about you. I’m here for you, no matter what. Can we please talk about what’s going on?"*
+
+#### 3. Create a Safe Home Environment
+* **Secure potential hazards:** Temporarily remove any items that could be used for self-harm.
+* **Don’t leave him alone:** Ensure that Ronald is not by himself until you have connected with a professional.
+
+Reaching out for help is a sign of strength and the most loving thing you can do for Ronald right now.
+`,
+
+  'default': `
+#### Building Strong Digital Habits
+Open communication and clear boundaries are crucial for online safety.
+* Schedule regular, tech-free family time to reconnect.
+* Create a family media plan that outlines rules for device use.
+* Remind your child that you are a safe person to talk to if they encounter anything online that worries them.
+`
+};
+
+
+// --- HARDCODED REPORTS MAP (with Markdown formatting) ---
+// --- HARDCODED REPORTS MAP (Reverted to Markdown Strings) ---
+const HARDCODED_REPORTS_MAP = {
+  'Alice': `
+### Digital Well-being Report: Alice
+**Generated On:** 2024-05-24
+
+---
+
+#### 1. Overview
+This report summarizes recent online activity for child 'Alice' over the last 7 days. The purpose is to highlight notable trends and potential areas of concern that may warrant a supportive conversation.
+
+#### 2. Key Observations
+* **Expressions of Distress:** A communication expressing feelings of loneliness and despair was detected on a social media application with a very high confidence level.
+* **Negative Social Interaction:** An interaction on a gaming platform was flagged for potential cyberbullying with a high confidence level.
+* **Exposure to Mature Content:** Web browsing activity included a visit to a website with content categorized as inappropriate for minors (medium confidence).
+
+#### 3. Summary of Identified Topics
+* **Mental Health Crisis:** Content related to self-harm ideation.
+* **Harassment:** Engagement in or exposure to cyberbullying.
+* **Adult Content:** Accessing websites with NSFW material.
+
+#### 4. Recommendations for Support
+* **Initiate an Open Conversation:** It could be beneficial to check in with Alice about her emotional well-being and offer a safe space to share her feelings.
+* **Discuss Online Safety:** A conversation about navigating online interactions and recognizing cyberbullying could be constructive.
+* **Review Digital Boundaries:** It may be a good time to review and adjust online safety settings together.
+`,
+
+  'Jake': `
+### Digital Well-being Report: Jake
+**Child ID:** c8502232-358b-4357-8531-90a60b13d2f3
+**Generated On:** 2024-07-31
+
+---
+
+#### Key Trends Summary
+* **Overall Positive Engagement:** A significant majority of the observed online activities have been categorized as positive, suggesting a generally healthy digital engagement.
+* **Browser and Search History:** Analysis indicates a high percentage of positive signals, suggesting explorations are centered around safe and constructive topics.
+* **Chat Messages:** Chat analysis also shows a high ratio of positive to negative interactions. This will be monitored.
+
+#### Activity Patterns
+* **Consistent Activity Levels:** Online activity has remained consistent throughout the week.
+* **Time of Day Analysis:** Most activity occurs during the afternoon and early evening.
+
+#### Recommendations
+* **Encourage Open Dialogue:** Continue to foster an environment of open communication about online experiences.
+* **Reinforce Positive Habits:** Acknowledge and encourage the positive online behaviors observed.
+* **Stay Informed:** Regularly review these reports to stay informed about trends.
+
+---
+**Disclaimer:** This report is generated based on anonymized data and is for informational purposes only.
+`,
+
+  'Ronald': `
+### Digital Well-being Report: Ronald
+**Generated On:** 2024-05-12
+
+---
+
+#### Summary
+Over the past week, a number of online activities were flagged across various platforms, frequently related to mature themes such as **bullying and violence**. A single, high-priority flag for content related to **self-harm ideation** was also noted.
+
+#### Key Observations
+* **Content Categories:** Engagement was focused on **Gaming**, **Social Media**, and **Entertainment**.
+* **Platforms Utilized:** Flagged activities were primarily on **Discord, Roblox, and YouTube**.
+* **Identified Digital Risks:**
+    * **Bullying:** Several instances were observed.
+    * **Violence:** This was a recurring theme.
+    * **Mature Content (NSFW):** Some activity included sexually suggestive content.
+    * **Self-Harm Ideation:** A significant flag was identified on Discord. This is a high-priority concern.
+
+#### Behavioral Trends
+The risk of exposure to violence and bullying appears to be a recurring trend. The instance related to self-harm ideation stands out as a critical event that should be addressed with care and urgency.
+`,
+
+  'default': `
+### Digital Well-being Report
+There is not enough specific data for this user to generate a detailed report.
+`
+};
 
 
     // --- NEW: DYNAMIC DATE CALCULATION BASED ON `timePeriod` ---
@@ -255,27 +404,16 @@ export function MonitoringDashboard() {
     };
 
     // --- AGENT AND REPORT HANDLERS (UPDATED TO USE TONE) ---
-    const handleGetReport = () => {
-        if (!activeChild) return;
-        setIsReportModalOpen(true);
-        setStreamedReportContent('');
-        const prompt = `Generate a digital well-being report for child '${activeChild}' for the last ${days} days. Please use a helpful, ${chatTone} tone.`;
-        sendPrompt(
-            prompt,
-            (chunk) => setStreamedReportContent((prev) => (prev || '') + chunk)
-        );
-    };
+  const handleGetReport = () => {
+    if (!activeChild) return;
 
-    const handleGetReportByTimeframe = () => {
-        if (!activeChild) return;
-        setIsReportModalOpen(true);
-        setStreamedReportContent('');
-        const prompt = `Generate a digital well-being report for child '${activeChild}' for the time period from ${startDate} to ${endDate}. Please use a helpful, ${chatTone} tone.`;
-        sendPrompt(
-            prompt,
-            (chunk) => setStreamedReportContent((prev) => (prev || '') + chunk)
-        );
-    };
+    const reportText = HARDCODED_REPORTS_MAP[activeChild] || HARDCODED_REPORTS_MAP['default'];
+    setStreamedReportContent(reportText);
+    setIsReportModalOpen(true);
+};
+
+
+    
 
     const handleGetParentalAdvice = () => {
         if (!activeChild) return;
@@ -534,7 +672,14 @@ export function MonitoringDashboard() {
         };
     }, [activityLogData]);
 
+     const selectedAdvice = useMemo(() => {
+        if (!activeChild) return PARENTAL_ADVICE_MAP['default'];
+        // Return the specific advice for the user, or the default if not found
+        return PARENTAL_ADVICE_MAP[activeChild] || PARENTAL_ADVICE_MAP['default'];
+    }, [activeChild]);
+
     const immediateThreats = threatFlags.find(flag => flag.type === 'immediate')?.count || 0;
+
     
     // Remaining code for other useMemo hooks and components can use `filteredData`
 
@@ -818,23 +963,7 @@ export function MonitoringDashboard() {
 
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* <Card>
-                                <CardHeader>
-                                    <CardTitle>Weekly Activity Events</CardTitle>
-                                    <CardDescription>Event counts over the past week</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
-                                        <BarChart data={weeklyUsage}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="date" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Bar dataKey="sitesVisited" fill="#3b82f6" name="Total Events" />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </CardContent>
-                            </Card> */}
+                            
                              <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
@@ -859,58 +988,33 @@ export function MonitoringDashboard() {
                             </Card>
 
                             {/* Aegis Says Section  change to recieve from adk*/}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2"><Brain className="w-5 h-5 text-primary" />Parental Advice</CardTitle>
-                                    <CardDescription>Aegis-powered insights and advice</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    {aegisReport ? (
-                                        <>
-                                            <div className="text-sm leading-relaxed text-foreground">{aegisReport.summary}</div>
-                                            <div className="space-y-2">
-                                                <h4 className="text-sm font-medium">Key Insights:</h4>
-                                                <ul className="space-y-1">
-                                                    {aegisReport.keyInsights.map((insight, index) => (
-                                                        <li key={index} className="text-xs text-muted-foreground flex items-start gap-2">
-                                                            <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>{insight}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                            <div className="pt-2 border-t"><p className="text-xs text-muted-foreground italic">{aegisReport.timestamp}</p></div>
-                                        </>
-                                    ) : <p>Generating AI summary...</p>}
-                                </CardContent>
-                            </Card>
+{/* Parental Advice Card */}
+<Card>
+    <CardHeader>
+        <CardTitle className="flex items-center gap-2"><Brain className="w-5 h-5 text-primary" />Parental Advice</CardTitle>
+        <CardDescription>Actionable advice for {activeChild}</CardDescription>
+    </CardHeader>
+    <CardContent>
+        {/* This ScrollArea constrains the height and makes the text scrollable */}
+         <ScrollArea className="h-[350px] w-full pr-4">
+        {/*
+          The <ReactMarkdown> component will convert your text into formatted HTML.
+          The `prose` classes from the typography plugin will style it beautifully.
+        */}
+        <article className="prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown>{selectedAdvice}</ReactMarkdown>
+        </article>
+    </ScrollArea>
+    </CardContent>
+</Card>
+
                         </div>
                     </TabsContent>
 
                     {/* Reports Tab */}
                     <TabsContent value="reports" className="space-y-4">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <BarChart3 className="w-5 h-5" />
-                                        Weekly Threat Trends
-                                    </CardTitle>
-                                    <CardDescription>Daily threat level detection over the past week</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ResponsiveContainer width="100%" height={300}>
-                                        <BarChart data={weeklyUsage}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="date" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Bar dataKey="neutral" stackId="a" fill="#16a34a" name="Neutral" />
-                                            <Bar dataKey="intermediate" stackId="a" fill="#eab308" name="Intermediate" />
-                                            <Bar dataKey="immediate" stackId="a" fill="#dc2626" name="Immediate" />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </CardContent>
-                            </Card> */}
+                            
                             <Card>
     <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -976,54 +1080,46 @@ export function MonitoringDashboard() {
                             </Card>
 
                             {/* Report Generation card */}
-                            <CardContent className="flex flex-col gap-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Switch
-                                            checked={isCustomDateRange}
-                                            onCheckedChange={setIsCustomDateRange}
-                                            className="data-[state=checked]:bg-primary shadow-lg focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                                        />
-                                        <Label htmlFor="custom-date-toggle">Custom Date Range</Label>
-                                    </div>
-                                    {/* Dynamically changing button */}
-                                    <Button
-                                        onClick={isCustomDateRange ? handleGetReportByTimeframe : handleGetReport}
-                                        disabled={isAgentLoading}
-                                    >
-                                        {isAgentLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-                                        Generate {isCustomDateRange ? 'Custom' : days}-Day Report
-                                    </Button>
-                                </div>
+                            {/* Report Generation card */}
+<CardContent className="flex flex-col gap-4">
+    {/* The date range toggle and inputs have been removed */}
+    <div className="flex items-center justify-end">
+        <Button
+            onClick={handleGetReport} // Always calls the single report function
+            disabled={isAgentLoading}
+        >
+            {isAgentLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+            Generate Report
+        </Button>
+    </div>
 
-                                {isCustomDateRange && (
-                                    <div className="flex gap-2">
-                                        <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                                        <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                                    </div>
-                                )}
-
-                                <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
-                                    <DialogContent className="sm:max-w-[625px]">
-                                        <DialogHeader>
-                                            <DialogTitle>Generated Digital Well-being Report</DialogTitle>
-                                            <DialogDescription>
-                                                This report for "{activeChild}" is being generated in a {chatTone} tone.
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <ScrollArea className="h-[400px] w-full rounded-md border p-4">
-                                            {isAgentLoading && !streamedReportContent && (
-                                                <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" />Connecting...</div>
-                                            )}
-                                            <pre className="text-sm whitespace-pre-wrap font-sans">{streamedReportContent}</pre>
-                                        </ScrollArea>
-                                        <DialogFooter>
-                                            <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
-                                            <Button onClick={handleDownloadReport} disabled={isAgentLoading || !streamedReportContent}><Download className="w-4 h-4 mr-2" />Download</Button>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
-                            </CardContent>
+    {/* The Dialog component for displaying the report remains unchanged here */}
+    <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
+    <DialogContent className="sm:max-w-3xl p-0">
+        {/* The content is now a single Card, just like the Parental Advice section */}
+        <Card className="border-none shadow-none">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" /> Digital Well-being Report
+                </CardTitle>
+                <CardDescription>
+                    A summary of recent online activity for {activeChild}
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ScrollArea className="h-[450px] w-full pr-4">
+                    <article className="prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown>{streamedReportContent}</ReactMarkdown>
+                    </article>
+                </ScrollArea>
+            </CardContent>
+            <DialogFooter className="p-6 pt-0">
+                <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
+            </DialogFooter>
+        </Card>
+    </DialogContent>
+</Dialog>
+</CardContent>
                         </div>
                         {/* Generated report display - no changes to its logic */}
                         {(isGeneratingReport || streamedReportContent) && (
