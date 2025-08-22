@@ -10,7 +10,6 @@ export const config = {
   BQ_API_ENDPOINT: 'https://aegis-ingestion-api-943089436637.us-central1.run.app/',
   
   // Replace with your actual Gemini API key
-  GEMINI_API_KEY: 'YOUR_API_KEY_HERE',
   GEMINI_API_LOCATION: 'us-central1',
   GEMINI_API_MODEL: 'gemini-2.5-flash', // The specific Gemini model you are using
   GEMINI_PROJECT_ID: 'trainee-project-tianyi', // Replace with your actual project ID
