@@ -33,6 +33,10 @@ lerna-debug.log*
 
 # Dependencies
 /node_modules
+*/node_modules
+*/.venv
+*/venv
+*/__pycache__
 
 # Misc
 .cache
@@ -41,4 +45,3 @@ lerna-debug.log*
 
 # Testing
 /coverage
-*/node_modules
