@@ -1,5 +1,4 @@
 fastapi
-pydantic
-google-cloud-bigquery
 uvicorn
 google-cloud-pubsub
+pydantic
