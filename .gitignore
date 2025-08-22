@@ -248,7 +248,3 @@ lerna-debug.log*
 
 # Testing
 /coverage
-<<<<<<< HEAD
-=======
-*/node_modules
->>>>>>> pubsub_dataflow
