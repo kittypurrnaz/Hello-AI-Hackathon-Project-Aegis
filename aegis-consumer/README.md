@@ -40,7 +40,27 @@ Before you begin, ensure you have the following tools and services configured:
       - `roles/bigquery.dataEditor`
   - **Cloud Storage Bucket:** A bucket to be used as a temporary location for Dataflow.
 
-### 1\. Set Up Environment Variables
+### 1\. Installation
+
+First, clone the repository and install the required Python packages using the `requirements.txt` file.
+
+```bash
+pip install -r requirements.txt
+```
+
+The `requirements.txt` file should include the following:
+
+```
+apache-beam
+fastapi
+google-cloud-pubsub
+google-cloud-bigquery
+pydantic
+python-dotenv
+uvicorn
+```
+
+### 2\. Set Up Environment Variables
 
 Set the following environment variables in your terminal to configure the application.
 
@@ -53,7 +73,7 @@ export BIGQUERY_TABLE_ID=[YOUR_BIGQUERY_TABLE_ID]
 export TEMP_CLOUD_STORAGE=[YOUR_BUCKET_NAME]
 ```
 
-### 2\. Create the Required Resources
+### 3\. Create the Required Resources
 
 Use the `gcloud` and `bq` commands to create the necessary resources in your project.
 
@@ -67,7 +87,7 @@ bq mk --table --project_id $GCP_PROJECT_ID $BIGQUERY_DATASET_ID.$BIGQUERY_TABLE_
     --schema='user_id:STRING,timestamp:TIMESTAMP,signal_type:STRING,flag_type:STRING,confidence:FLOAT,topic_category:STRING,source_platform:STRING,event_details:RECORD'
 ```
 
-### 3\. Deploy the FastAPI Service
+### 4\. Deploy the FastAPI Service
 
 Deploy the FastAPI service to a new Cloud Run service.
 
@@ -81,7 +101,7 @@ gcloud run deploy aegis-consumer \
 
 This command will automatically containerize your FastAPI app, deploy it to Cloud Run, and set up the necessary environment variables.
 
-### 4\. Run the Dataflow Pipeline
+### 5\. Run the Dataflow Pipeline
 
 The Dataflow pipeline is a separate, continuously running job that listens to the Pub/Sub topic and streams data into BigQuery.
 

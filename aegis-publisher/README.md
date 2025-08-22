@@ -35,7 +35,26 @@ Before you begin, ensure you have the following configured in your Google Cloud 
       - `roles/pubsub.publisher`
       - `roles/dlp.user`
 
-### 1\. Set Up Environment Variables
+### 1\. Installation
+
+First, clone the repository and install the required Python packages using the `requirements.txt` file.
+
+```bash
+pip install -r requirements.txt
+```
+
+The `requirements.txt` file should include the following:
+
+```
+fastapi
+google-cloud-pubsub
+google-cloud-dlp
+pydantic
+python-dotenv
+uvicorn
+```
+
+### 2\. Set Up Environment Variables
 
 Set the following environment variables in your terminal to configure the application. These values are used by the FastAPI service to connect to the correct Google Cloud resources.
 
@@ -44,7 +63,7 @@ export GCP_PROJECT_ID=[YOUR_GCP_PROJECT_ID]
 export PUB_SUB_TOPIC_ID=[YOUR_PUB_SUB_TOPIC_ID]
 ```
 
-### 2\. Create the Required Pub/Sub Topic
+### 3\. Create the Required Pub/Sub Topic
 
 Use the `gcloud` command to create the Pub/Sub topic that the API will publish messages to.
 
@@ -52,7 +71,7 @@ Use the `gcloud` command to create the Pub/Sub topic that the API will publish m
 gcloud pubsub topics create $PUB_SUB_TOPIC_ID
 ```
 
-### 3\. Deploy the FastAPI Service
+### 4\. Deploy the FastAPI Service
 
 Deploy the FastAPI service to a new Cloud Run service. The following command will automatically containerize your application and deploy it.
 
