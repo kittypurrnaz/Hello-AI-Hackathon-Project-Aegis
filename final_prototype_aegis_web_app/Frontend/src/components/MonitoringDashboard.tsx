@@ -1096,28 +1096,30 @@ There is not enough specific data for this user to generate a detailed report.
 
     {/* The Dialog component for displaying the report remains unchanged here */}
    <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
-    <DialogContent className="sm:max-w-3xl p-0">
-        <Card className="border-none shadow-none">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-primary" /> Digital Well-being Report
-                </CardTitle>
-                <CardDescription>
-                    A summary of recent online activity for {activeChild}
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {/* THE FIX IS HERE: The height is now responsive to prevent overflow */}
-                <ScrollArea className="max-h-[70vh] w-full pr-4">
-                    <article className="prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown>{streamedReportContent}</ReactMarkdown>
-                    </article>
-                </ScrollArea>
-            </CardContent>
-            <DialogFooter className="p-6 pt-0">
-                <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
-            </DialogFooter>
-        </Card>
+    <DialogContent className="sm:max-w-3xl">
+        <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" /> Digital Well-being Report
+            </DialogTitle>
+            <DialogDescription>
+                A summary of recent online activity for {activeChild}.
+            </DialogDescription>
+        </DialogHeader>
+        
+        {/* This is the simplified UI that mimics the Parental Advice card.
+          The content is placed in a scrollable area with a defined height.
+        */}
+        <div className="py-4">
+            <ScrollArea className="h-[450px] w-full rounded-md border p-4">
+                <article className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown>{streamedReportContent}</ReactMarkdown>
+                </article>
+            </ScrollArea>
+        </div>
+        
+        <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
+        </DialogFooter>
     </DialogContent>
 </Dialog>
 </CardContent>
