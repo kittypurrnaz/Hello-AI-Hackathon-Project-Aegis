@@ -1,10 +1,3 @@
----
-
-### **2. `main.py`**
-
-This is the core of your application. It defines a FastAPI endpoint that receives data and inspects it for sensitive information before publishing it to a Pub/Sub topic.
-
-```python:FastAPI Pub/Sub and DLP API:main.py
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
