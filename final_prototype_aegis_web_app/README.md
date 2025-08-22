@@ -2,6 +2,17 @@
 
 A comprehensive, AI-powered web application for monitoring and protecting children's online browsing activity. Built with React, TypeScript, and modern web technologies using **Figma Make**.
 
+* **Frontend**: The user interface is built with **React** and **TypeScript**. It features a responsive design created in **Figma** and implemented with **Tailwind CSS v4** and **ShadCN UI components**. The dashboard utilizes **Recharts** for clear data visualization.
+* **Backend**: The backend is a robust ingestion hub built with **FastAPI** on **Google Cloud Run**. It uses **Pydantic** for strict data validation and **CORS** for secure communication. Data is streamed to **BigQuery** via **Pub/Sub** and processed by **Dataflow** for analysis. The Node.js API server, also deployed on Google Cloud Run, serves as the primary communication layer for the frontend. It exposes the following key endpoints:
+    * `/api/users`: Fetches a list of unique user IDs from BigQuery to populate the user selection dropdown.
+    * `/api/dashboard-metrics/:userId`: Retrieves aggregated data (total events, immediate/intermediate/neutral flags) for a specific user and a given date range to power the main dashboard metrics and charts.
+    * `/api/activity-log/:userId`: Fetches the raw activity log for a specific user, enabling the detailed view of all flagged events.
+    * `/api/summarize-activity`: Uses the **Gemini API** to generate a natural language summary and actionable advice based on a provided set of flagged activity data.
+* **Chrome Extension**: The **Manifest V3** Chrome extension collects data by monitoring web navigation. It uses the **Gemini API** for on-device text analysis of URLs and for visual context from screenshots. It authenticates with the **chrome.identity API** to securely communicate with the backend.
+* **Agentspace AI**: The Aegis Agent provides conversational, context-aware guidance to parents. It uses data from **BigQuery** to generate empathetic and actionable advice in natural language.
+
+---
+
 ## 🏗️ **Built with Figma Make**
 
 This application was created using **Figma Make**, Figma's AI-powered web application builder that transforms ideas into production-ready React applications. Figma Make enabled rapid prototyping and development of this comprehensive monitoring dashboard with advanced features like AI agents, real-time threat detection, and interactive data visualizations.
