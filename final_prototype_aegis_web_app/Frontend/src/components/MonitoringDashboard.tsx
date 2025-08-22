@@ -1107,7 +1107,8 @@ There is not enough specific data for this user to generate a detailed report.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <ScrollArea className="h-[450px] w-full pr-4">
+                {/* THE FIX IS HERE: The height is now responsive to prevent overflow */}
+                <ScrollArea className="max-h-[70vh] w-full pr-4">
                     <article className="prose prose-sm dark:prose-invert max-w-none">
                         <ReactMarkdown>{streamedReportContent}</ReactMarkdown>
                     </article>
