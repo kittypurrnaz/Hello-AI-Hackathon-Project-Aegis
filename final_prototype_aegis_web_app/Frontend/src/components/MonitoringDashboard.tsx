@@ -207,6 +207,7 @@ Open communication and clear boundaries are crucial for online safety.
 
 // --- HARDCODED REPORTS MAP (with Markdown formatting) ---
 // --- HARDCODED REPORTS MAP (Reverted to Markdown Strings) ---
+// --- HARDCODED REPORTS MAP (Reverted to Markdown Strings) ---
 const HARDCODED_REPORTS_MAP = {
   'Alice': `
 ### Digital Well-being Report: Alice
@@ -215,12 +216,12 @@ const HARDCODED_REPORTS_MAP = {
 ---
 
 #### 1. Overview
-This report summarizes recent online activity for child 'Alice' over the last 7 days. The purpose is to highlight notable trends and potential areas of concern that may warrant a supportive conversation.
+This report summarizes recent online activity for child 'Alice' over the last 7 days. The purpose of this summary is to highlight notable trends and potential areas of concern that may warrant a supportive conversation.
 
 #### 2. Key Observations
 * **Expressions of Distress:** A communication expressing feelings of loneliness and despair was detected on a social media application with a very high confidence level.
 * **Negative Social Interaction:** An interaction on a gaming platform was flagged for potential cyberbullying with a high confidence level.
-* **Exposure to Mature Content:** Web browsing activity included a visit to a website with content categorized as inappropriate for minors (medium confidence).
+* **Exposure to Mature Content:** Web browsing activity included a visit to a website with content categorized as inappropriate for minors.
 
 #### 3. Summary of Identified Topics
 * **Mental Health Crisis:** Content related to self-harm ideation.
@@ -229,7 +230,7 @@ This report summarizes recent online activity for child 'Alice' over the last 7 
 
 #### 4. Recommendations for Support
 * **Initiate an Open Conversation:** It could be beneficial to check in with Alice about her emotional well-being and offer a safe space to share her feelings.
-* **Discuss Online Safety:** A conversation about navigating online interactions and recognizing cyberbullying could be constructive.
+* **Discuss Online Safety:** A conversation about navigating online interactions, recognizing cyberbullying, and strategies for handling negative experiences could be constructive.
 * **Review Digital Boundaries:** It may be a good time to review and adjust online safety settings together.
 `,
 
@@ -241,18 +242,18 @@ This report summarizes recent online activity for child 'Alice' over the last 7 
 ---
 
 #### Key Trends Summary
-* **Overall Positive Engagement:** A significant majority of the observed online activities have been categorized as positive, suggesting a generally healthy digital engagement.
-* **Browser and Search History:** Analysis indicates a high percentage of positive signals, suggesting explorations are centered around safe and constructive topics.
-* **Chat Messages:** Chat analysis also shows a high ratio of positive to negative interactions. This will be monitored.
+* **Overall Positive Engagement:** A significant majority of the observed online activities have been categorized as positive. This suggests a generally healthy and constructive digital engagement.
+* **Browser and Search History:** Analysis of web browsing and search history indicates a high percentage of positive signals.
+* **Chat Messages:** Chat message analysis also shows a high ratio of positive to negative interactions. A slightly higher incidence of negative signals was noted in chat messages compared to browsing, which is a common pattern and will be monitored.
 
 #### Activity Patterns
-* **Consistent Activity Levels:** Online activity has remained consistent throughout the week.
-* **Time of Day Analysis:** Most activity occurs during the afternoon and early evening.
+* **Consistent Activity Levels:** Online activity levels have remained consistent throughout the week.
+* **Time of Day Analysis:** The majority of online activity occurs during the afternoon and early evening hours.
 
 #### Recommendations
 * **Encourage Open Dialogue:** Continue to foster an environment of open communication about online experiences.
 * **Reinforce Positive Habits:** Acknowledge and encourage the positive online behaviors observed.
-* **Stay Informed:** Regularly review these reports to stay informed about trends.
+* **Stay Informed:** Regularly review these reports to stay informed about your child's digital well-being.
 
 ---
 **Disclaimer:** This report is generated based on anonymized data and is for informational purposes only.
@@ -268,13 +269,13 @@ This report summarizes recent online activity for child 'Alice' over the last 7 
 Over the past week, a number of online activities were flagged across various platforms, frequently related to mature themes such as **bullying and violence**. A single, high-priority flag for content related to **self-harm ideation** was also noted.
 
 #### Key Observations
-* **Content Categories:** Engagement was focused on **Gaming**, **Social Media**, and **Entertainment**.
-* **Platforms Utilized:** Flagged activities were primarily on **Discord, Roblox, and YouTube**.
+* **Content Categories of Interest:** A pattern of engagement with content related to **Gaming**, **Social Media**, and **Entertainment** was observed.
+* **Platforms Utilized:** Flagged activities were primarily observed on **Discord, Roblox, and YouTube**.
 * **Identified Digital Risks:**
-    * **Bullying:** Several instances were observed.
-    * **Violence:** This was a recurring theme.
-    * **Mature Content (NSFW):** Some activity included sexually suggestive content.
-    * **Self-Harm Ideation:** A significant flag was identified on Discord. This is a high-priority concern.
+    * **Bullying:** Several instances of content flagged for bullying were observed.
+    * **Violence:** Content flagged for violence was a recurring theme.
+    * **Mature Content (NSFW):** Some activity included content of a sexually suggestive nature.
+    * **Self-Harm Ideation:** A significant flag for content related to self-harm was identified on Discord. This is a high-priority concern that warrants immediate attention.
 
 #### Behavioral Trends
 The risk of exposure to violence and bullying appears to be a recurring trend. The instance related to self-harm ideation stands out as a critical event that should be addressed with care and urgency.
@@ -1094,9 +1095,8 @@ There is not enough specific data for this user to generate a detailed report.
     </div>
 
     {/* The Dialog component for displaying the report remains unchanged here */}
-    <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
+   <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
     <DialogContent className="sm:max-w-3xl p-0">
-        {/* The content is now a single Card, just like the Parental Advice section */}
         <Card className="border-none shadow-none">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
