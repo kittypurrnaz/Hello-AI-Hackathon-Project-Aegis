@@ -18,27 +18,20 @@ from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 
 from . import prompt
-from .sub_agents.aegis_analysis_agent import aegis_analysis_agent
-from .sub_agents.bigquery_agent import bigquery_agent
-from .sub_agents.empathetic_advice_agent import empathetic_advice_agent
+from .sub_agents.aegis_analysis_agent.agent import aegis_analysis_agent
+from .sub_agents.bigquery_agent.agent import bigquery_agent
+from .sub_agents.empathetic_advice_agent.agent import empathetic_advice_agent
+from .sub_agents.chat_agent.agent import chat_agent # Now import the chat_agent
 
-# Removed:
-# import vertexai
-# from google.oauth2 import service_account
-# All code related to SERVICE_ACCOUNT_KEY_PATH, credentials, and vertexai.init()
-# This logic is handled by the Cloud Run environment variables.
-
-MODEL = "gemini-2.5-pro"  # Use a stable, public model
+MODEL = "gemini-2.5-pro"
 
 router_agent = LlmAgent(
     name="router_agent",
     model=MODEL,
-    # The 'project' and 'location' arguments are removed as they are not needed here.
-    # The LlmAgent gets them from the environment variables set during deployment.
     description=(
         "An intelligent router agent that directs requests related to a child's "
-        "digital well-being. It can call an analysis agent for reports and advice "
-        "or a BigQuery agent for raw data needs."
+        "digital well-being. It can call an analysis agent for reports and advice, "
+        "a BigQuery agent for raw data needs, or a chat agent for conversation."
     ),
     instruction=prompt.ROUTER_AGENT_PROMPT,
     output_key="router_agent_output",
@@ -46,6 +39,7 @@ router_agent = LlmAgent(
         AgentTool(agent=bigquery_agent),
         AgentTool(agent=aegis_analysis_agent),
         AgentTool(agent=empathetic_advice_agent),
+        AgentTool(agent=chat_agent), # Added the chat_agent tool
     ],
 )
 
