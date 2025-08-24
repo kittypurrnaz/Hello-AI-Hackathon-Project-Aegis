@@ -118,6 +118,9 @@ export function MonitoringDashboard() {
 
     // --- AGENT STATE (UPDATED) ---
     const [isAgentLoading, setIsAgentLoading] = useState(false);
+    const [isAdviceLoading, setIsAdviceLoading] = useState(false); // New state for advice loading
+    const [parentalAdvice, setParentalAdvice] = useState<string | null>(null); // New state for advice content
+
     
     const [startDate, setStartDate] = useState('2025-08-01');
     const [endDate, setEndDate] = useState('2025-08-31');
@@ -130,9 +133,46 @@ export function MonitoringDashboard() {
     // --- NEW: STATE FOR TIME PERIOD SELECTION ---
     const [timePeriod, setTimePeriod] = useState('7');
 
+    // This new function is dedicated to the advice card in the Overview tab.
+    const fetchDashboardAdvice = () => {
+        if (!activeChild) return;
+        const prompt = `Provide parental advice for '${activeChild}' based on their activity from ${startFormatted} to ${endFormatted}.`;
+
+        const onStart = () => {
+            setIsAdviceLoading(true);
+            setParentalAdvice("🧠 Generating personalized advice based on recent activity...");
+        };
+
+        const onFinish = (result) => {
+            setIsAdviceLoading(false);
+            let finalContent = "Could not retrieve advice at this time.";
+
+            if (result.error) {
+                finalContent = `Error: ${result.message}`;
+            } else if (result.response && Array.isArray(result.response) && result.response.length > 0) {
+                const adviceEvent = result.response.find(event =>
+                    event.content?.parts[0]?.function_response?.name === 'empathetic_advice_agent'
+                );
+
+                if (adviceEvent?.content?.parts[0]?.function_response?.response?.result) {
+                    finalContent = adviceEvent.content.parts[0].function_response.response.result;
+                } else {
+                    const lastEvent = result.response[result.response.length - 1];
+                    finalContent = lastEvent?.content?.parts[0]?.text || finalContent;
+                }
+            }
+            setParentalAdvice(finalContent);
+        };
+
+        fetchAegisReport(prompt, activeChild, onStart, onFinish);
+    };
+
+    
+
     // Base URL for your API
     const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api';
-    // const ADK_SERVER_URL = import.meta.env.VITE_ADK_URL;
+    
+    const ADK_SERVER_URL = (import.meta.env.VITE_ADK_URL || 'https://aegis-python-backend-943089436637.us-central1.run.app');
     // --- PARENTAL ADVICE MAP ---
 // IMPORTANT: Replace the keys ('Alice', 'Jake', 'Ronald') with the actual user IDs from your database.
 // --- PARENTAL ADVICE MAP (with Markdown formatting) ---
@@ -309,7 +349,12 @@ There is not enough specific data for this user to generate a detailed report.
         };
     }, [timePeriod]);
 
-    
+    // This useEffect now correctly calls the new function for the dashboard advice.
+    useEffect(() => {
+        if (activeChild) {
+            fetchDashboardAdvice();
+        }
+    }, [activeChild, startFormatted, endFormatted]);
 
     // 1. Fetch the list of users (children) on component mount
     useEffect(() => {
@@ -353,7 +398,7 @@ There is not enough specific data for this user to generate a detailed report.
                 setError(null);
                 setIsLoading(true);
                 // --- MODIFIED: PASS start and end dates to API ---
-                const response = await fetch(`${API_BASE_URL}/dashboard-data/${activeChild}?startDate=${startFormatted}&endDate=${endFormatted}`);
+                const response = await fetch(`${API_BASE_URL}/activity-log/${activeChild}?startDate=${startFormatted}&endDate=${endFormatted}`);
                 if (!response.ok) throw new Error(`Failed to fetch data for ${activeChild}.`);
 
                 const data = await response.json();
@@ -372,80 +417,238 @@ There is not enough specific data for this user to generate a detailed report.
         fetchDataForChild();
     }, [activeChild, startFormatted, endFormatted]);
 
-    
-
-
 
     // --- CORE ADK AGENT LOGIC ---
-    const sendPrompt = async (promptText, onChunk) => {
-        setIsAgentLoading(true);
-        try {
-            const response = await fetch(`${ADK_SERVER_URL}/run_sse`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: promptText }),
-            });
-            if (!response.ok || !response.body) throw new Error(`HTTP error! Status: ${response.status}`);
+    // --- AI AGENT API CALLER ---
+    // const fetchAegisReport = async (promptText, sessionId, onStart, onFinish) => {
+    //     // This is the core function for calling the backend, so it'll handle loading states
+    //     onStart();
+    //     try {
+    //         const backendUrl = `${ADK_SERVER_URL}/ask-agent`;
+    //         const response = await fetch(backendUrl, {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify({
+    //                 message: promptText,
+    //                 user_id: sessionId,
+    //             }),
+    //         });
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-                const chunk = decoder.decode(value);
-                onChunk(chunk); // Call the callback with the new piece of text
+    //         if (!response.ok) {
+    //             const errorData = await response.json();
+    //             throw new Error(errorData.message || 'Failed to get a response from the agent backend.');
+    //         }
+
+    //         const result = await response.json();
+            
+    //         // Pass the full result to the onFinish callback
+    //         onFinish(result);
+
+    //     } catch (error) {
+    //         console.error("ADK Agent Engine error:", error);
+    //         // Pass the error to the onFinish callback
+    //         onFinish({ error: true, message: error.message });
+    //     }
+    // };
+
+    const fetchAegisReport = async (promptText, sessionId, onStart, onFinish) => {
+        onStart();
+        try {
+            const backendUrl = `${ADK_SERVER_URL}/ask-agent`;
+            const response = await fetch(backendUrl, {
+                method: 'POST', // <-- Must be POST
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: promptText,
+                    user_id: sessionId,
+                }),
+            });
+
+            // This is the crucial part that handles an unresponsive server
+            if (!response) {
+                onFinish({ error: true, message: 'No response from server.' });
+                return;
             }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Server responded with status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            onFinish(result);
+
         } catch (error) {
-            const errorMessage = `Error: ${error.message}. Please check the ADK server URL and CORS settings.`;
-            onChunk(errorMessage);
-            console.error(error);
-        } finally {
-            setIsAgentLoading(false);
+            console.error("ADK Agent Engine error:", error);
+            onFinish({ error: true, message: error.message });
         }
     };
 
-    // --- AGENT AND REPORT HANDLERS (UPDATED TO USE TONE) ---
-  const handleGetReport = () => {
-    if (!activeChild) return;
+    // --- AGENT HANDLERS (Simplified for single response) ---
+    const handleGetReport = () => {
+        if (!activeChild) {
+            setStreamedReportContent('No child selected. Please select a child to generate a report.');
+            setIsReportModalOpen(true);
+            return;
+        }
 
-    const reportText = HARDCODED_REPORTS_MAP[activeChild] || HARDCODED_REPORTS_MAP['default'];
-    setStreamedReportContent(reportText);
-    setIsReportModalOpen(true);
-};
+        // You still need onStart to handle the loading state
+        const onStart = () => {
+            setIsAgentLoading(true);
+            setStreamedReportContent('Generating report, please wait...');
+            setIsReportModalOpen(true);
+        };
 
+        // The onFinish callback now handles the entire response at once
+        const onFinish = (result) => {
+            setIsAgentLoading(false);
+            console.log('Raw API Response:', result); // This is a great debugging tool!
 
-    
+            let finalContent = "No report content was generated."; // Default fallback message
 
+            if (result.error) {
+                finalContent = `Error: ${result.message}`;
+            } else if (result.response && Array.isArray(result.response) && result.response.length > 0) {
+                // Find the event with the function_response that contains the report
+                const reportEvent = result.response.find(event => 
+                    event.content?.parts[0]?.function_response?.name === 'aegis_analysis_agent'
+                );
+
+                if (reportEvent?.content?.parts[0]?.function_response?.response?.result) {
+                    finalContent = reportEvent.content.parts[0].function_response.response.result;
+                } else {
+                    // As a final fallback, try to get the text from the very last event
+                    const lastEvent = result.response[result.response.length - 1];
+                    finalContent = lastEvent?.content?.parts[0]?.text || finalContent;
+                }
+            }
+            
+            setStreamedReportContent(finalContent);
+        };
+
+        const reportPrompt = `Generate a digital well-being report for ${activeChild}'s activity from ${startFormatted} to ${endFormatted}.`;
+
+        // Call the non-streaming fetch function
+        fetchAegisReport(reportPrompt, activeChild, onStart, onFinish);
+    };
+
+    // Parental Advice
     const handleGetParentalAdvice = () => {
         if (!activeChild) return;
         const prompt = `Provide general parental advice for a child like '${activeChild}' regarding online safety, based on common risks. Please use a helpful, ${chatTone} tone.`;
         const agentMessageId = (Date.now() + 1).toString();
-        const placeholderMessage = { id: agentMessageId, message: '', sender: 'agent', timestamp: new Date() };
+        const placeholderMessage = { id: agentMessageId, message: '...', sender: 'agent', timestamp: new Date() };
         setChatHistory(prev => [...prev, placeholderMessage]);
 
-        sendPrompt(prompt, (chunk) => {
+        const onStart = () => {
+            setIsAgentLoading(true);
+        };
+
+        const onFinish = (result) => {
+            setIsAgentLoading(false);
+            let finalContent = "No advice found."; // New fallback message
+
+            if (result.error) {
+                finalContent = `Error: ${result.message}`;
+            } else if (result.response && Array.isArray(result.response) && result.response.length > 0) {
+                const adviceEvent = result.response.find(event =>
+                    event.content?.parts[0]?.function_response?.name === 'empathetic_advice_agent'
+                );
+                if (adviceEvent?.content?.parts[0]?.function_response?.response?.result) {
+                    finalContent = adviceEvent.content.parts[0].function_response.response.result;
+                } else {
+                    const lastEvent = result.response[result.response.length - 1];
+                    finalContent = lastEvent?.content?.parts[0]?.text || finalContent;
+                }
+            }
             setChatHistory(prev => prev.map(msg =>
-                msg.id === agentMessageId ? { ...msg, message: msg.message + chunk } : msg
+                msg.id === agentMessageId ? { ...msg, message: finalContent } : msg
             ));
-        });
+        };
+
+        fetchAegisReport(prompt, activeChild, onStart, onFinish);
     };
 
+    // Chat Handler
     const handleChat = () => {
+        // Moved this check to the top to prevent sending empty messages
         if (!chatMessage.trim() || !activeChild) return;
+
         const userMessage = { id: Date.now().toString(), message: chatMessage, sender: 'user', timestamp: new Date() };
         const agentMessageId = (Date.now() + 1).toString();
-        const placeholderMessage = { id: agentMessageId, message: '', sender: 'agent', timestamp: new Date() };
+        const placeholderMessage = { id: agentMessageId, message: '...', sender: 'agent', timestamp: new Date() };
 
         setChatHistory(prev => [...prev, userMessage, placeholderMessage]);
-        // Instruct the agent on its persona and tone before answering the user's query
         const prompt = `As an AI assistant for parents, respond to the following query using a helpful, ${chatTone} tone. Query: "${chatMessage}"`;
         setChatMessage('');
 
-        sendPrompt(prompt, (chunk) => {
+        const onStart = () => {
+            setIsAgentLoading(true);
+        };
+
+        const onFinish = (result) => {
+            setIsAgentLoading(false);
+            let finalContent = "No response found.";
+
+            if (result.error) {
+                finalContent = `Error: ${result.message}`;
+            } else if (result.response && Array.isArray(result.response) && result.response.length > 0) {
+                const chatEvent = result.response.find(event =>
+                    event.content?.parts[0]?.function_response?.name === 'chat_agent'
+                );
+                if (chatEvent?.content?.parts[0]?.function_response?.response?.result) {
+                    finalContent = chatEvent.content.parts[0].function_response.response.result;
+                } else {
+                    const lastEvent = result.response[result.response.length - 1];
+                    finalContent = lastEvent?.content?.parts[0]?.text || finalContent;
+                }
+            }
             setChatHistory(prev => prev.map(msg =>
-                msg.id === agentMessageId ? { ...msg, message: msg.message + chunk } : msg
+                msg.id === agentMessageId ? { ...msg, message: finalContent } : msg
             ));
-        });
+        };
+
+        fetchAegisReport(prompt, activeChild, onStart, onFinish);
+    };
+
+    // Renamed and corrected for the "Agents" tab button.
+    const handleGetGeneralAdvice = () => {
+        if (!activeChild) return;
+        const prompt = `Provide general parental advice for a child like '${activeChild}' regarding online safety, based on common risks. Please use a helpful, ${chatTone} tone.`;
+        const agentMessageId = (Date.now() + 1).toString();
+        const placeholderMessage = { id: agentMessageId, message: '...', sender: 'agent', timestamp: new Date() };
+        
+        // This function now correctly interacts with the chat history
+        setChatHistory(prev => [...prev, placeholderMessage]);
+
+        const onStart = () => {
+            setIsAgentLoading(true);
+        };
+
+        const onFinish = (result) => {
+            setIsAgentLoading(false);
+            let finalContent = "No advice found.";
+
+            if (result.error) {
+                finalContent = `Error: ${result.message}`;
+            } else if (result.response && Array.isArray(result.response) && result.response.length > 0) {
+                const adviceEvent = result.response.find(event =>
+                    event.content?.parts[0]?.function_response?.name === 'empathetic_advice_agent'
+                );
+                if (adviceEvent?.content?.parts[0]?.function_response?.response?.result) {
+                    finalContent = adviceEvent.content.parts[0].function_response.response.result;
+                } else {
+                    const lastEvent = result.response[result.response.length - 1];
+                    finalContent = lastEvent?.content?.parts[0]?.text || finalContent;
+                }
+            }
+            // It updates the placeholder in the chat history
+            setChatHistory(prev => prev.map(msg =>
+                msg.id === agentMessageId ? { ...msg, message: finalContent } : msg
+            ));
+        };
+
+        fetchAegisReport(prompt, activeChild, onStart, onFinish);
     };
 
     const handleDownloadReport = () => {
@@ -545,45 +748,11 @@ There is not enough specific data for this user to generate a detailed report.
         setWeeklyUsage(Object.values(usageByDay));
 
         // Fetch AI-powered summary
-        fetchAegisReport(filteredData);
     };
 
 
     // --- AI-POWERED SUMMARY ---
-    const fetchAegisReport = async (activityData) => {
-        if (activityData.length === 0) {
-            setAegisReport({
-                summary: "No activity data available to analyze for the selected user.",
-                keyInsights: [],
-                timestamp: "Generated just now"
-            });
-            return;
-        }
-        try {
-            const response = await fetch(`${API_BASE_URL}/summarize-activity`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ activityData }) // Send the raw data
-            });
-
-            if (!response.ok) throw new Error('Failed to get summary from AI.');
-
-            const result = await response.json();
-            setAegisReport({
-                summary: result.summary.actionable_advice.join(' '),
-                keyInsights: result.summary.key_risks,
-                timestamp: "Generated just now"
-            });
-
-        } catch (err) {
-            console.error("Gemini summary error:", err);
-            setAegisReport({
-                summary: "Could not generate an AI summary at this time.",
-                keyInsights: ["Please check the backend server and Gemini API configuration."],
-                timestamp: "Error"
-            });
-        }
-    };
+    
 
     const highestRiskUsage = useMemo(() => {
     return weeklyUsage.map(day => {
@@ -673,11 +842,13 @@ There is not enough specific data for this user to generate a detailed report.
         };
     }, [activityLogData]);
 
-     const selectedAdvice = useMemo(() => {
-        if (!activeChild) return PARENTAL_ADVICE_MAP['default'];
-        // Return the specific advice for the user, or the default if not found
-        return PARENTAL_ADVICE_MAP[activeChild] || PARENTAL_ADVICE_MAP['default'];
-    }, [activeChild]);
+    //  const selectedAdvice = useMemo(() => {
+    //     if (!activeChild) return PARENTAL_ADVICE_MAP['default'];
+    //     // Return the specific advice for the user, or the default if not found
+    //     return PARENTAL_ADVICE_MAP[activeChild] || PARENTAL_ADVICE_MAP['default'];
+    // }, [activeChild]);
+
+    const selectedAdvice = useMemo(() => parentalAdvice, [parentalAdvice]);
 
     const immediateThreats = threatFlags.find(flag => flag.type === 'immediate')?.count || 0;
 
@@ -992,20 +1163,31 @@ There is not enough specific data for this user to generate a detailed report.
 {/* Parental Advice Card */}
 <Card>
     <CardHeader>
-        <CardTitle className="flex items-center gap-2"><Brain className="w-5 h-5 text-primary" />Parental Advice</CardTitle>
-        <CardDescription>Actionable advice for {activeChild}</CardDescription>
+        <CardTitle className="flex items-center gap-2"><Brain className="w-5 h-5 text-primary" />Parental Considerations</CardTitle>
+        <CardDescription>Actionable insights for {activeChild}</CardDescription>
     </CardHeader>
     <CardContent>
-        {/* This ScrollArea constrains the height and makes the text scrollable */}
-         <ScrollArea className="h-[350px] w-full pr-4">
-        {/*
-          The <ReactMarkdown> component will convert your text into formatted HTML.
-          The `prose` classes from the typography plugin will style it beautifully.
-        */}
-        <article className="prose prose-sm dark:prose-invert max-w-none">
-            <ReactMarkdown>{selectedAdvice}</ReactMarkdown>
-        </article>
-    </ScrollArea>
+        {/* Conditional rendering based on the loading state */}
+        {isAdviceLoading ? (
+            <div className="flex justify-center items-center h-[350px] text-muted-foreground">
+                <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                <span>Generating advice...</span>
+            </div>
+        ) : (
+            <ScrollArea className="h-[350px] w-full pr-4">
+                {/* Only render ReactMarkdown if parentalAdvice is a non-empty string */}
+                {parentalAdvice && (
+                    <article className="prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown>{parentalAdvice}</ReactMarkdown>
+                    </article>
+                )}
+                {!parentalAdvice && (
+                    <div className="flex justify-center items-center h-full text-muted-foreground">
+                        <p>No advice generated yet. Please select a child.</p>
+                    </div>
+                )}
+            </ScrollArea>
+        )}
     </CardContent>
 </Card>
 
@@ -1140,12 +1322,17 @@ There is not enough specific data for this user to generate a detailed report.
                                     {isGeneratingReport && !streamedReportContent && (
                                         <div className="flex items-center gap-2 text-muted-foreground">
                                             <Loader2 className="w-4 h-4 animate-spin" />
-                                            Generating report, please wait...
+                                            <span>Generating report, please wait...</span>
                                         </div>
                                     )}
-                                    <pre className="text-sm whitespace-pre-wrap font-sans">
-                                        {streamedReportContent}
-                                    </pre>
+                                    {/* The ScrollArea with ReactMarkdown to handle the overflow */}
+                                    {streamedReportContent && (
+                                        <ScrollArea className="h-[450px] w-full rounded-md border p-4">
+                                            <article className="prose prose-sm dark:prose-invert max-w-none">
+                                                <ReactMarkdown>{streamedReportContent}</ReactMarkdown>
+                                            </article>
+                                        </ScrollArea>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
@@ -1235,13 +1422,42 @@ There is not enough specific data for this user to generate a detailed report.
         </CardTitle>
         <CardDescription>Your conversation is in a <span className="font-semibold text-primary">{chatTone}</span> tone.</CardDescription>
     </CardHeader>
-    <CardContent className="flex items-center justify-center h-96">
+    <CardContent className="h-96 flex flex-col justify-end">
+        {/* Chat history display area */}
+        <ScrollArea className="flex-1 p-4 mb-4 rounded-md border">
+            <div className="space-y-4">
+                {chatHistory.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`p-3 rounded-lg max-w-[80%] ${msg.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                            <ReactMarkdown>{msg.message}</ReactMarkdown>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </ScrollArea>
+        {/* Chat input and send button */}
+        <div className="flex items-center gap-2">
+            <Input
+                placeholder="Message the agent..."
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                onKeyPress={(e) => {
+                if (e.key === 'Enter') handleChat();
+                }}
+                disabled={isAgentLoading}
+            />
+            <Button onClick={handleChat} disabled={isAgentLoading}>
+                {isAgentLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </Button>
+        </div>
+    </CardContent>
+    {/* <CardContent className="flex items-center justify-center h-96">
         <div className="text-center text-muted-foreground p-8">
             <Cpu className="w-12 h-12 mx-auto mb-4" />
             <h4 className="text-xl font-semibold">AI Chat Coming Soon</h4>
             <p className="mt-2">Our AI assistant is currently being trained to provide real-time, personalized advice. Please check back later!</p>
         </div>
-    </CardContent>
+    </CardContent> */}
 </Card>
                             <Card className="lg:col-span-1">
                                 <CardHeader>
@@ -1259,7 +1475,7 @@ There is not enough specific data for this user to generate a detailed report.
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <Button onClick={handleGetParentalAdvice} disabled={isAgentLoading} className="w-full">
+                                    <Button onClick={handleGetGeneralAdvice} disabled={isAgentLoading} className="w-full">
                                         {isAgentLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <BookOpen className="w-4 h-4 mr-2" />}
                                         Get General Advice
                                     </Button>

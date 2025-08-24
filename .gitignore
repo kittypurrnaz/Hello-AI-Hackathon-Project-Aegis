@@ -248,3 +248,4 @@ lerna-debug.log*
 
 # Testing
 /coverage
+final_prototype_aegis_web_app/api-service/service_account_key.json

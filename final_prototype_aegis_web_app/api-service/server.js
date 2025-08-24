@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const { BigQuery } = require('@google-cloud/bigquery');
 const fetch = require('node-fetch');
+const { GoogleAuth } = require('google-auth-library');
 
 // Initialize Express app and BigQuery client
 const app = express();
@@ -62,7 +63,8 @@ app.get('/api/dashboard-metrics/:userId', async (req, res) => {
     var duration = endDate - startDate; 
 
     if (startDate && endDate) {
-        query += ` AND DATE(timestamp) BETWEEN DATE_SUB(@endDate, INTERVAL @duration DAY) AND @endDate()`;
+        // query += ` AND DATE(timestamp) BETWEEN DATE_SUB(@endDate, INTERVAL @duration DAY) AND @endDate()`;
+        query += ` AND DATE(timestamp) BETWEEN @startDate AND @endDate`;
         options.params.startDate = startDate;
         options.params.endDate = endDate;
     }
@@ -193,3 +195,4 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`API Server listening on port ${PORT}`);
 });
+
