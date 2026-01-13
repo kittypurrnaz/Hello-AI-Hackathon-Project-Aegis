@@ -34,7 +34,7 @@ You can access the live demo of the Aegis frontend application and its features 
 
 To get started, simply navigate to the provided link and explore the dashboard.
 
-<img width="1920" height="1032" alt="homepage" src="https://github.com/user-attachments/assets/090f972e-3419-47bf-bc09-2686e76c8484" />
+![Dashboard]<img width="1920" height="1032" alt="homepage" src="https://github.com/user-attachments/assets/090f972e-3419-47bf-bc09-2686e76c8484" />
 
 ---
 
