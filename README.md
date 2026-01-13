@@ -34,6 +34,8 @@ You can access the live demo of the Aegis frontend application and its features 
 
 To get started, simply navigate to the provided link and explore the dashboard.
 
+![Dashboard]<img width="1920" height="1032" alt="homepage" src="https://github.com/user-attachments/assets/090f972e-3419-47bf-bc09-2686e76c8484" />
+
 ---
 
 ## Project Features
@@ -60,7 +62,8 @@ Aegis is built on a robust, full-stack architecture powered by Google Cloud.
 
 ---
 
-## Source Code
-The source code for the Aegis project is available on GitHub.
+## Project Ownership
+This project was developed collaboratively by a team of 5.
+This repository is a fork created to showcase my personal contributions.
+Original repository: <https://github.com/kittypurrnaz/Hello-AI-Hackathon-Project-Aegis>
 
-**GitHub Repository:** <https://github.com/kittypurrnaz/Hello-AI-Hackathon-Project-Aegis>
